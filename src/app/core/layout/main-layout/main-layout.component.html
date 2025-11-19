@@ -1,0 +1,81 @@
+<div class="layout">
+  <!-- Overlay para cerrar el sidebar en mobile -->
+  <div 
+    class="sidebar-overlay" 
+    [class.active]="isSidebarOpen"
+    (click)="toggleSidebar()"
+  ></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="isSidebarOpen">
+    <!-- Botón de cierre en mobile -->
+    <button class="sidebar-close" (click)="toggleSidebar()">
+      <ng-icon name="lucideX" size="18"></ng-icon>
+    </button>
+
+    <div class="sidebar-top">
+      <ng-icon class="user-icon" name="lucideUser" size="20"></ng-icon>
+      <div class="user-info">
+        <div class="user-name">Alejandro Carrion</div>
+        <div class="user-role">Administrador</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <h3>Dashboard</h3>
+      <ul>
+        <li>
+          <a 
+            [routerLink]="'/home'" 
+            [class.active]="currentRoute === '/home'"
+            (click)="closeSidebarOnMobile()"
+          >
+            <ng-icon name="lucideHome" size="20"></ng-icon> Home
+          </a>
+        </li>
+        <li>
+          <a 
+            [routerLink]="'/sales'" 
+            [class.active]="currentRoute === '/sales'"
+            (click)="closeSidebarOnMobile()"
+          >
+            <ng-icon name="lucideShoppingCart" size="20"></ng-icon> Ventas
+          </a>
+        </li>
+        <li>
+          <a 
+            [routerLink]="'/products'" 
+            [class.active]="currentRoute === '/products'"
+            (click)="closeSidebarOnMobile()"
+          >
+            <ng-icon name="lucideBox" size="20"></ng-icon> Productos
+          </a>
+        </li>
+        <li>
+          <a 
+            [routerLink]="'/sellers'" 
+            [class.active]="currentRoute === '/sellers'"
+            (click)="closeSidebarOnMobile()"
+          >
+            <ng-icon name="lucideUsers" size="20"></ng-icon> Vendedores
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <header class="header">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        <ng-icon name="lucideMenu" size="24"></ng-icon>
+      </button>
+
+      <div class="header-actions">
+        <app-switch></app-switch>
+        <app-logout [showText]="false"></app-logout>
+      </div>
+    </header>
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

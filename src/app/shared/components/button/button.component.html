@@ -1,0 +1,20 @@
+<button 
+  class="button" 
+  [ngClass]="{
+    'primary': isPrimary && !variant,
+    'secondary': !isPrimary && !variant,
+    'success': variant === 'success',
+    'danger': variant === 'danger',
+    'warning': variant === 'warning',
+    'btn-sm': size === 'small',
+    'btn-lg': size === 'large',
+    'btn-block': fullWidth,
+    'btn-icon': iconOnly,
+    'loading': isLoading
+  }"
+  [disabled]="disabled || isLoading"
+  (click)="handleClick()"
+>
+  <ng-icon *ngIf="icon && !isLoading" [name]="icon" size="20"></ng-icon>
+  <span *ngIf="!iconOnly">{{ label }}</span>
+</button>

@@ -1,0 +1,189 @@
+.logout-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &:hover:not(:disabled) {
+    .logout-circle {
+      transform: scale(1.05);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 
+        0 0 30px rgba(255, 255, 255, 0.2),
+        inset 0 0 20px rgba(255, 255, 255, 0.05);
+    }
+
+    .logout-glow {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+
+    .logout-icon svg {
+      color: #FFFFFF;
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8))
+              drop-shadow(0 0 16px rgba(255, 255, 255, 0.6));
+    }
+
+    .logout-text {
+      color: #FFFFFF;
+    }
+  }
+
+  &:active:not(:disabled) {
+    .logout-circle {
+      transform: scale(0.95);
+    }
+  }
+}
+
+.logout-circle {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(45, 45, 45, 0.9) 0%,
+    rgba(25, 25, 25, 0.95) 50%,
+    rgba(15, 15, 15, 1) 100%
+  );
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    inset 0 2px 8px rgba(255, 255, 255, 0.05),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+
+  // Efecto de luz superior
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 30%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(255, 255, 255, 0.15) 0%,
+      transparent 70%
+    );
+    border-radius: 50%;
+  }
+
+  // Efecto de sombra inferior
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 40%;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.4) 0%,
+      transparent 70%
+    );
+    border-radius: 50%;
+  }
+}
+
+.logout-glow {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.3) 30%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  box-shadow: 
+    0 0 30px rgba(255, 255, 255, 0.5),
+    0 0 60px rgba(255, 255, 255, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.logout-icon {
+  position: relative;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+
+  .icon {
+    color: #E5E7EB;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4))
+            drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+  }
+}
+
+.logout-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: #9CA3AF;
+  transition: color 0.3s ease;
+  white-space: nowrap;
+}
+
+// Animación de pulsación
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.logout-button:hover:not(:disabled) .logout-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+// Variante sin texto (solo icono)
+.logout-button.icon-only {
+  .logout-text {
+    display: none;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .logout-circle {
+    width: 56px;
+    height: 56px;
+  }
+
+  .logout-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .logout-text {
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,71 @@
+<div class="flex items-center justify-center max-h-full bg-[url('/BgMain.svg')] bg-cover bg-center text-white px-[70px] py-[170px]">
+  
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 w-full max-w-full items-center">
+    
+    <!-- Columna izquierda - Avatar -->
+    <div class="flex items-center justify-center">
+      <div class="relative">
+        <img 
+          src="/avatar.png" 
+          alt="Avatar" 
+          class="w-[500px] h-[500px] object-contain drop-shadow-2xl transition-transform duration-300 hover:scale-105"
+        >
+      </div>
+    </div>
+
+    <!-- Columna derecha - Acciones -->
+    <div class="flex flex-col">
+
+      <h1 class="text-4xl font-bold text-white/95 mb-3">Bienvenido de nuevo</h1>
+      <p class="text-lg text-white/60 mb-10">¿Que desea hacer hoy?</p>
+      
+      <div class="bg-linear-to-br from-[#2A2A2A]/90 via-[#343434]/85 to-[#2A2A2A]/90 backdrop-blur-xl rounded-2xl shadow-2xl p-10 border border-white/10 relative overflow-hidden">
+        
+        <!-- Efecto de brillo sutil -->
+        <div class="absolute inset-0 rounded-2xl bg-linear-to-br from-white/5 via-transparent to-white/5 pointer-events-none"></div>
+        
+        <!-- Contenido -->
+        <div class="relative z-10">
+          
+
+          <!-- Botones de acción -->
+          <div class="flex flex-col gap-4">
+            
+            <!-- Registrar venta -->
+            <button class="group relative flex items-center gap-4 bg-transparent border border-emerald-500/30 rounded-xl p-4 transition-all duration-300 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/20">
+              <div class="flex items-center justify-center w-12 h-12 bg-emerald-500/20 rounded-lg border border-emerald-500/30 group-hover:bg-emerald-500/30 group-hover:border-emerald-500/50 transition-all duration-300">
+                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+              </div>
+              <span class="text-lg font-medium text-white/90 group-hover:text-white transition-colors duration-300">Registrar venta</span>
+            </button>
+
+            <!-- Registrar producto -->
+            <button class="group relative flex items-center gap-4 bg-transparent border border-emerald-500/30 rounded-xl p-4 transition-all duration-300 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/20">
+              <div class="flex items-center justify-center w-12 h-12 bg-emerald-500/20 rounded-lg border border-emerald-500/30 group-hover:bg-emerald-500/30 group-hover:border-emerald-500/50 transition-all duration-300">
+                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+              </div>
+              <span class="text-lg font-medium text-white/90 group-hover:text-white transition-colors duration-300">Registrar producto</span>
+            </button>
+
+            <!-- Registrar vendedor -->
+            <button class="group relative flex items-center gap-4 bg-transparent border border-emerald-500/30 rounded-xl p-4 transition-all duration-300 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/20">
+              <div class="flex items-center justify-center w-12 h-12 bg-emerald-500/20 rounded-lg border border-emerald-500/30 group-hover:bg-emerald-500/30 group-hover:border-emerald-500/50 transition-all duration-300">
+                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+              </div>
+              <span class="text-lg font-medium text-white/90 group-hover:text-white transition-colors duration-300">Registrar vendedor</span>
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

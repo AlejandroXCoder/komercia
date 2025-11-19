@@ -1,0 +1,16 @@
+<div class="input-container">
+  <label *ngIf="label" class="input-label">{{ label }}</label>
+  <div class="input-wrapper">
+    <span *ngIf="iconName" class="input-icon">
+      <ng-icon [name]="iconName" size="18"></ng-icon>
+    </span>
+    <input
+      [type]="type"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [value]="value"
+      (input)="handleInput($event)"
+      class="input-field"
+    />
+  </div>
+</div>

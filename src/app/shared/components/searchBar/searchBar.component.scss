@@ -1,0 +1,352 @@
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: #252525;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background-clip: padding-box;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+
+  // Borde con gradiente radial
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    padding: 1px;
+    background: radial-gradient(
+      circle at 50% 50%,
+      #4F4F4F 0%,
+      #B5B5B5 64%,
+      #4F4F4F 100%
+    );
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  // Icono de búsqueda
+  ng-icon {
+    color: #ffff;
+    flex-shrink: 0;
+    z-index: 1;
+    transition: color 0.3s ease;
+  }
+
+  // Input
+  input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #E5E7EB;
+    font-size: 15px;
+    font-weight: 400;
+    z-index: 1;
+    width: 100%;
+    
+    &::placeholder {
+      color: #6B7280;
+      font-weight: 400;
+    }
+
+    &:focus {
+      color: #FFFFFF;
+    }
+  }
+
+  // Estado focus
+  &:focus-within {
+    background: #2A2A2A;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+    &::before {
+      background: radial-gradient(
+        circle at 50% 50%,
+        #6F6F6F 0%,
+        #D5D5D5 64%,
+        #6F6F6F 100%
+      );
+    }
+
+    ng-icon {
+      color: #E5E7EB;
+    }
+  }
+
+  // Estado hover
+  &:hover:not(:focus-within) {
+    background: #2A2A2A;
+
+    &::before {
+      background: radial-gradient(
+        circle at 50% 50%,
+        #5F5F5F 0%,
+        #C5C5C5 64%,
+        #5F5F5F 100%
+      );
+    }
+
+    ng-icon {
+      color: #B5B5B5;
+    }
+  }
+}
+
+// Variante con botón de búsqueda
+.search-bar-with-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 700px;
+
+  .search-bar {
+    flex: 1;
+    max-width: none;
+  }
+
+  .search-button {
+    padding: 12px 24px;
+    background: #252525;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: #E5E7EB;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-clip: padding-box;
+    position: relative;
+    white-space: nowrap;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 10px;
+      padding: 1px;
+      background: radial-gradient(
+        circle at 50% 50%,
+        #4F4F4F 0%,
+        #B5B5B5 64%,
+        #4F4F4F 100%
+      );
+      -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    &:hover {
+      background: #2A2A2A;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// Variante compacta
+.search-bar.compact {
+  padding: 8px 16px;
+  border-radius: 8px;
+  max-width: 400px;
+
+  ng-icon {
+    font-size: 18px;
+  }
+
+  input {
+    font-size: 14px;
+  }
+
+  &::before {
+    border-radius: 8px;
+  }
+}
+
+// Variante expandida
+.search-bar.expanded {
+  padding: 14px 24px;
+  border-radius: 12px;
+
+  ng-icon {
+    font-size: 22px;
+  }
+
+  input {
+    font-size: 16px;
+  }
+
+  &::before {
+    border-radius: 12px;
+  }
+}
+
+// Con botón de limpiar
+.search-bar.with-clear {
+  .clear-button {
+    background: transparent;
+    border: none;
+    color: #6B7280;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 1;
+    flex-shrink: 0;
+
+    ng-icon {
+      font-size: 18px;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #9CA3AF;
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+  }
+}
+
+// Autocomplete suggestions
+.search-container {
+  position: relative;
+  width: 100%;
+
+  .suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: #2A2A2A;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+
+    &.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .suggestion-item {
+      padding: 12px 20px;
+      color: #E5E7EB;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+      ng-icon {
+        color: #6B7280;
+        font-size: 16px;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #FFFFFF;
+
+        ng-icon {
+          color: #9CA3AF;
+        }
+      }
+
+      &:active {
+        background: rgba(255, 255, 255, 0.08);
+      }
+    }
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.3);
+      border-radius: 3px;
+
+      &:hover {
+        background: rgba(156, 163, 175, 0.5);
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .search-bar {
+    padding: 10px 16px;
+    max-width: none;
+
+    ng-icon {
+      font-size: 18px;
+    }
+
+    input {
+      font-size: 14px;
+    }
+  }
+
+  .search-bar-with-button {
+    flex-direction: column;
+    
+    .search-bar {
+      width: 100%;
+    }
+
+    .search-button {
+      width: 100%;
+    }
+  }
+}
+
+// Autocomplete styling
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #252525 inset;
+  -webkit-text-fill-color: #E5E7EB;
+  transition: background-color 5000s ease-in-out 0s;
+}

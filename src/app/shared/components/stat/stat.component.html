@@ -1,0 +1,12 @@
+<!-- Con tendencia -->
+<div class="stat with-trend" [ngClass]="colorClass">
+  <ng-icon *ngIf="icon" [name]="icon" size="48"></ng-icon>
+  <div class="stat-info">
+    <h3>{{ title }}</h3>
+    <p>{{ value }}</p>
+    <div *ngIf="trend" class="trend" [ngClass]="{ 'trend-up': trendUp, 'trend-down': !trendUp }">
+      <ng-icon [name]="trendUp ? 'lucideTrendingUp' : 'lucideTrendingDown'" size="14"></ng-icon>
+      <span>{{ trend }}</span>
+    </div>
+  </div>
+</div>

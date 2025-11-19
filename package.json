@@ -31,8 +31,15 @@
     "@angular/platform-server": "^20.3.0",
     "@angular/router": "^20.3.0",
     "@angular/ssr": "^20.3.10",
+    "@ng-icons/core": "^32.4.0",
+    "@ng-icons/heroicons": "^32.4.0",
+    "@ng-icons/lucide": "^32.4.0",
+    "@tailwindcss/postcss": "^4.1.17",
     "express": "^5.1.0",
+    "ngx-sonner": "^3.1.0",
+    "postcss": "^8.5.6",
     "rxjs": "~7.8.0",
+    "tailwindcss": "^4.1.17",
     "tslib": "^2.3.0"
   },
   "devDependencies": {

@@ -1,0 +1,18 @@
+<div class="search-bar" [ngClass]="{ 'with-clear': showClearButton && searchValue }">
+  <ng-icon name="lucideSearch" size="20"></ng-icon>
+  <input 
+    type="text" 
+    [placeholder]="placeholder" 
+    [value]="searchValue"
+    (input)="onInput($event)"
+    (keyup.enter)="onEnter()"
+  />
+  <button 
+    *ngIf="showClearButton && searchValue" 
+    class="clear-button"
+    (click)="clearSearch()"
+    type="button"
+  >
+    <ng-icon name="lucideX" size="18"></ng-icon>
+  </button>
+</div>

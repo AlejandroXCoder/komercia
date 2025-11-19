@@ -1,0 +1,9 @@
+<button class="logout-button" (click)="handleLogout()" [disabled]="isLoggingOut">
+  <div class="logout-circle">
+    <div class="logout-glow"></div>
+    <div class="logout-icon">
+      <ng-icon class="icon" name="lucideLogOut" size="20"></ng-icon>
+    </div>
+  </div>
+  <span class="logout-text" *ngIf="showText">Cerrar sesión</span>
+</button>

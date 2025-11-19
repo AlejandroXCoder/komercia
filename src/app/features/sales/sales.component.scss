@@ -1,0 +1,176 @@
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #E5E7EB;
+  
+  .text-red-400 {
+    color: #F87171;
+    margin-left: 2px;
+  }
+}
+
+.form-select {
+  padding: 12px 16px;
+  background: rgba(37, 37, 37, 0.52);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #E5E7EB;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  background-clip: padding-box;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239CA3AF' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+
+  // Borde radial igual que los inputs
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    padding: 1px;
+    background: radial-gradient(
+      circle at 50% 50%,
+      #4F4F4F 0%,
+      #B5B5B5 64%,
+      #4F4F4F 100%
+    );
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  &:focus {
+    outline: none;
+    background-color: rgba(37, 37, 37, 0.7);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &.error {
+    border-color: rgba(239, 68, 68, 0.5);
+  }
+
+  option {
+    background: #2A2A2A;
+    color: #E5E7EB;
+    padding: 8px;
+  }
+}
+
+.form-textarea {
+  padding: 12px 16px;
+  background: rgba(37, 37, 37, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #E5E7EB;
+  font-size: 15px;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    background: rgba(37, 37, 37, 0.7);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &::placeholder {
+    color: #6B7280;
+  }
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(37, 37, 37, 0.3);
+
+  &:hover {
+    background: rgba(37, 37, 37, 0.5);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}
+
+.radio-input {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #6B7280;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+
+  &:checked {
+    border-color: #10B981;
+    background: #10B981;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+    }
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+}
+
+.radio-text {
+  font-size: 14px;
+  color: #E5E7EB;
+  user-select: none;
+}
+
+.form-error {
+  font-size: 13px;
+  color: #F87171;
+  margin-top: 4px;
+  display: block;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Espacio entre elementos del formulario
+.space-y-5 > * + * {
+  margin-top: 20px;
+}

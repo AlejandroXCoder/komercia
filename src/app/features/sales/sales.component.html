@@ -1,0 +1,192 @@
+<div class="flex items-center justify-center bg-[url('/BgMain.svg')] bg-cover bg-center h-full text-white px-4 sm:px-10 lg:px-[100px] py-10 lg:py-[70px]">
+  <div class="w-full max-w-[1600px] h-full gap-8 flex flex-col">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <app-stat
+        [value]="totalVentas.toString()"
+        title="Total de Ventas"
+        icon="lucideShoppingCart"
+        colorClass="primary"
+      ></app-stat>
+
+      <app-stat
+        [value]="valorTotalVentas.toString()"
+        title="Ingresos Totales"
+        icon="lucideDollarSign"
+        colorClass="success"
+      ></app-stat>
+
+      <app-stat
+        [value]="totalProductos.toString()"
+        title="Productos Vendidos"
+        icon="lucideBox"
+        colorClass="purple"
+      ></app-stat>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-6 items-stretch sm:items-center justify-between">
+      <app-search-bar
+        placeholder="Buscar ventas por vendedor, fecha o ID..."
+        class="flex-1"
+        (inputChange)="handleSearch($event)"
+      ></app-search-bar>
+
+      <app-button
+        icon="lucidePlus"
+        label="Registrar venta"
+        (clicked)="openModal()"
+      ></app-button>
+    </div>
+
+    <app-table 
+      [headers]="headers" 
+      [data]="filteredSalesData"
+      [isLoading]="isLoading"
+    ></app-table>
+
+    <app-modal 
+      [isOpen]="isModalOpen" 
+      (onClose)="handleCloseModal()"
+      size="md"
+    >
+      <span modal-title>{{ isEditMode ? 'Editar venta' : 'Registrar nueva venta' }}</span>
+      <span modal-description>Complete los datos de la venta</span>
+
+      <form [formGroup]="saleForm" (ngSubmit)="saveSale()" modal-body class="space-y-5">
+        
+        <div class="form-group">
+          <label class="form-label">
+            Vendedor <span class="text-red-400">*</span>
+          </label>
+          <select 
+            formControlName="vendedor" 
+            class="form-select"
+            [class.error]="isFieldInvalid('vendedor')"
+          >
+            <option value="">Seleccione un vendedor</option>
+            <option *ngFor="let seller of sellers" [value]="seller.id">
+              {{ seller.nombre }}
+            </option>
+          </select>
+          <span class="form-error" *ngIf="isFieldInvalid('vendedor')">
+            {{ getErrorMessage('vendedor') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Fecha <span class="text-red-400">*</span>
+          </label>
+          <app-input 
+            type="date" 
+            [value]="saleForm.get('fecha')?.value"
+            (input)="onDateChange($event)"
+            [ngClass]="{'error': isFieldInvalid('fecha')}"
+          ></app-input>
+          <span class="form-error" *ngIf="isFieldInvalid('fecha')">
+            {{ getErrorMessage('fecha') }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          
+          <div class="form-group">
+            <label class="form-label">
+              Total <span class="text-red-400">*</span>
+            </label>
+            <app-input 
+              type="number" 
+              placeholder="0.00"
+              iconName="lucideDollarSign"
+              [value]="saleForm.get('total')?.value"
+              (input)="onInputChange('total', $event)"
+              [ngClass]="{'error': isFieldInvalid('total')}"
+            ></app-input>
+            <span class="form-error" *ngIf="isFieldInvalid('total')">
+              {{ getErrorMessage('total') }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              Cantidad de productos <span class="text-red-400">*</span>
+            </label>
+            <app-input 
+              type="number" 
+              placeholder="0"
+              iconName="lucideBox"
+              [value]="saleForm.get('cantidadProductos')?.value"
+              (input)="onInputChange('cantidadProductos', $event)"
+              [ngClass]="{'error': isFieldInvalid('cantidadProductos')}"
+            ></app-input>
+            <span class="form-error" *ngIf="isFieldInvalid('cantidadProductos')">
+              {{ getErrorMessage('cantidadProductos') }}
+            </span>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Estado <span class="text-red-400">*</span>
+          </label>
+          <div class="flex gap-4">
+            <label class="radio-label">
+              <input 
+                type="radio" 
+                formControlName="estado" 
+                value="Activo"
+                class="radio-input"
+              >
+              <span class="radio-text">Activo</span>
+            </label>
+            <label class="radio-label">
+              <input 
+                type="radio" 
+                formControlName="estado" 
+                value="Inactivo"
+                class="radio-input"
+              >
+              <span class="radio-text">Inactivo</span>
+            </label>
+          </div>
+          <span class="form-error" *ngIf="isFieldInvalid('estado')">
+            {{ getErrorMessage('estado') }}
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notas (opcional)</label>
+          <textarea 
+            formControlName="notas" 
+            class="form-textarea"
+            placeholder="Agregue notas adicionales sobre la venta..."
+            rows="3"
+          ></textarea>
+        </div>
+
+      </form>
+
+      <div modal-footer>
+        
+        <div class="flex w-auto justify-center gap-5 align-middle">
+
+          <app-button 
+          label="Cancelar" 
+          [isPrimary]="false"
+          (clicked)="handleCloseModal()"
+          ></app-button>
+          <app-button 
+            [label]="isEditMode ? 'Actualizar' : 'Guardar'"
+            [disabled]="saleForm.invalid || isSubmitting"
+            [isLoading]="isSubmitting"
+            (clicked)="onSubmit()"
+          ></app-button>
+
+        </div>
+        
+      </div>
+
+    </app-modal>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+<div class="modal-overlay" [class.show]="isOpen" (click)="onOverlayClick($event)">
+  <div class="modal-container" [class.show]="isOpen" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-header-content">
+        <h2 class="modal-title">
+          <ng-content select="[modal-title]"></ng-content>
+        </h2>
+        <p class="modal-description">
+          <ng-content select="[modal-description]"></ng-content>
+        </p>
+      </div>
+      <button class="modal-close" (click)="close()" *ngIf="showCloseButton">
+        <ng-icon name="lucideX" size="24"></ng-icon>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body" [class.no-padding]="noPadding">
+      <ng-content select="[modal-body]"></ng-content>
+    </div>
+  </div>
+</div>

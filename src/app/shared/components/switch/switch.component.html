@@ -1,0 +1,13 @@
+<div class="switch-container" (click)="toggleDarkMode()">
+  <div class="switch-track">
+    <div class="switch-slider" [class.active-light]="!isDarkMode"></div>
+    <div class="icon-wrapper moon" [class.active]="isDarkMode">
+      <div class="neon-glow"></div>
+      <ng-icon name="lucideMoon" size="20"></ng-icon>
+    </div>
+    <div class="icon-wrapper sun" [class.active]="!isDarkMode">
+      <div class="neon-glow"></div>
+      <ng-icon name="lucideSun" size="20"></ng-icon>
+    </div>
+  </div>
+</div>
