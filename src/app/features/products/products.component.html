@@ -50,227 +50,248 @@
     ></app-table>
 
     <!-- Modal de Formulario -->
-    <app-modal 
-      [isOpen]="isModalOpen" 
-      (onClose)="handleCloseModal()"
-      size="md"
-    >
-      <span modal-title>{{ isEditMode ? 'Editar producto' : 'Registrar nuevo producto' }}</span>
-      <span modal-description>Complete los datos del producto</span>
-
-      <form [formGroup]="productForm" (ngSubmit)="saveProduct()" modal-body class="space-y-5">
+    <div class="modal-overlay" [class.show]="isModalOpen" (click)="onOverlayClick($event, 'form')">
+      <div class="modal-container" [class.show]="isModalOpen" (click)="$event.stopPropagation()">
         
-        <!-- Nombre -->
-        <div class="form-group">
-          <label class="form-label">
-            Nombre <span class="text-red-400">*</span>
-          </label>
-          <app-input 
-            type="text" 
-            placeholder="Ingrese el nombre del producto"
-            [value]="productForm.get('name')?.value"
-            (input)="onInputChange('name', $event)"
-            [ngClass]="{'error': isFieldInvalid('name')}"
-          ></app-input>
-          <span class="form-error" *ngIf="isFieldInvalid('name')">
-            {{ getErrorMessage('name') }}
-          </span>
-        </div>
-
-        <!-- Descripción -->
-        <div class="form-group">
-          <label class="form-label">Descripción</label>
-          <textarea 
-            formControlName="description" 
-            class="form-textarea"
-            placeholder="Ingrese una descripción del producto..."
-            rows="3"
-          ></textarea>
-          <span class="form-error" *ngIf="isFieldInvalid('description')">
-            {{ getErrorMessage('description') }}
-          </span>
-        </div>
-
-        <!-- Grid de dos columnas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          
-          <!-- Precio -->
-          <div class="form-group">
-            <label class="form-label">
-              Precio <span class="text-red-400">*</span>
-            </label>
-            <app-input 
-              type="number" 
-              placeholder="0.00"
-              icon="lucideDollarSign"
-              [value]="productForm.get('price')?.value"
-              (input)="onInputChange('price', $event)"
-              [ngClass]="{'error': isFieldInvalid('price')}"
-            ></app-input>
-            <span class="form-error" *ngIf="isFieldInvalid('price')">
-              {{ getErrorMessage('price') }}
-            </span>
+        <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
+          <!-- Header del Modal -->
+          <div class="modal-header">
+            <div class="modal-header-content">
+              <h2 class="modal-title">{{ isEditMode ? 'Editar producto' : 'Registrar nuevo producto' }}</h2>
+              <p class="modal-description">Complete los datos del producto</p>
+            </div>
+            <button type="button" class="modal-close" (click)="handleCloseModal()">
+              <ng-icon name="lucideX" size="24"></ng-icon>
+            </button>
           </div>
 
-          <!-- Stock -->
-          <div class="form-group">
-            <label class="form-label">
-              Stock <span class="text-red-400">*</span>
-            </label>
-            <app-input 
-              type="number" 
-              placeholder="0"
-              icon="lucideBox"
-              [value]="productForm.get('stock')?.value"
-              (input)="onInputChange('stock', $event)"
-              [ngClass]="{'error': isFieldInvalid('stock')}"
-            ></app-input>
-            <span class="form-error" *ngIf="isFieldInvalid('stock')">
-              {{ getErrorMessage('stock') }}
-            </span>
+          <!-- Body del Modal -->
+          <div class="modal-body">
+            
+            <!-- Nombre -->
+            <div class="form-group">
+              <label class="form-label">
+                Nombre <span class="text-red-400">*</span>
+              </label>
+              <app-input 
+                type="text" 
+                placeholder="Ingrese el nombre del producto"
+                [value]="productForm.get('name')?.value"
+                (input)="onInputChange('name', $event)"
+                [ngClass]="{'error': isFieldInvalid('name')}"
+              ></app-input>
+              <span class="form-error" *ngIf="isFieldInvalid('name')">
+                {{ getErrorMessage('name') }}
+              </span>
+            </div>
+
+            <!-- Descripción -->
+            <div class="form-group">
+              <label class="form-label">Descripción</label>
+              <textarea 
+                formControlName="description" 
+                class="form-textarea"
+                placeholder="Ingrese una descripción del producto..."
+                rows="3"
+              ></textarea>
+              <span class="form-error" *ngIf="isFieldInvalid('description')">
+                {{ getErrorMessage('description') }}
+              </span>
+            </div>
+
+            <!-- Grid de dos columnas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              
+              <!-- Precio -->
+              <div class="form-group">
+                <label class="form-label">
+                  Precio <span class="text-red-400">*</span>
+                </label>
+                <app-input 
+                  type="number" 
+                  placeholder="0.00"
+                  icon="lucideDollarSign"
+                  [value]="productForm.get('price')?.value"
+                  (input)="onInputChange('price', $event)"
+                  [ngClass]="{'error': isFieldInvalid('price')}"
+                ></app-input>
+                <span class="form-error" *ngIf="isFieldInvalid('price')">
+                  {{ getErrorMessage('price') }}
+                </span>
+              </div>
+
+              <!-- Stock -->
+              <div class="form-group">
+                <label class="form-label">
+                  Stock <span class="text-red-400">*</span>
+                </label>
+                <app-input 
+                  type="number" 
+                  placeholder="0"
+                  icon="lucideBox"
+                  [value]="productForm.get('stock')?.value"
+                  (input)="onInputChange('stock', $event)"
+                  [ngClass]="{'error': isFieldInvalid('stock')}"
+                ></app-input>
+                <span class="form-error" *ngIf="isFieldInvalid('stock')">
+                  {{ getErrorMessage('stock') }}
+                </span>
+              </div>
+
+            </div>
+
+            <!-- Imagen URL -->
+            <div class="form-group">
+              <label class="form-label">URL de Imagen</label>
+              <app-input 
+                type="text" 
+                placeholder="https://ejemplo.com/imagen.jpg"
+                icon="lucideImage"
+                [value]="productForm.get('image')?.value"
+                (input)="onInputChange('image', $event)"
+              ></app-input>
+            </div>
+
+            <!-- Estado -->
+            <div class="form-group">
+              <label class="form-label">
+                Estado <span class="text-red-400">*</span>
+              </label>
+              <div class="flex gap-4">
+                <label class="radio-label">
+                  <input 
+                    type="radio" 
+                    formControlName="status" 
+                    [value]="true"
+                    class="radio-input"
+                  >
+                  <span class="radio-text">Activo</span>
+                </label>
+                <label class="radio-label">
+                  <input 
+                    type="radio" 
+                    formControlName="status" 
+                    [value]="false"
+                    class="radio-input"
+                  >
+                  <span class="radio-text">Inactivo</span>
+                </label>
+              </div>
+            </div>
+
           </div>
 
-        </div>
-
-        <!-- Imagen URL -->
-        <div class="form-group">
-          <label class="form-label">URL de Imagen</label>
-          <app-input 
-            type="text" 
-            placeholder="https://ejemplo.com/imagen.jpg"
-            icon="lucideImage"
-            [value]="productForm.get('image')?.value"
-            (input)="onInputChange('image', $event)"
-          ></app-input>
-        </div>
-
-        <!-- Estado -->
-        <div class="form-group">
-          <label class="form-label">
-            Estado <span class="text-red-400">*</span>
-          </label>
-          <div class="flex gap-4">
-            <label class="radio-label">
-              <input 
-                type="radio" 
-                formControlName="status" 
-                [value]="true"
-                class="radio-input"
-              >
-              <span class="radio-text">Activo</span>
-            </label>
-            <label class="radio-label">
-              <input 
-                type="radio" 
-                formControlName="status" 
-                [value]="false"
-                class="radio-input"
-              >
-              <span class="radio-text">Inactivo</span>
-            </label>
+          <!-- Footer del Modal -->
+          <div class="modal-footer">
+            <div class="flex gap-5">
+              <app-button 
+                label="Cancelar" 
+                [isPrimary]="false"
+                type="button"
+                (clicked)="handleCloseModal()"
+              ></app-button>
+              <app-button 
+                [label]="isEditMode ? 'Actualizar' : 'Guardar'"
+                [disabled]="productForm.invalid || isSubmitting"
+                [isLoading]="isSubmitting"
+                type="submit"
+              ></app-button>
+            </div>
           </div>
-        </div>
 
-      </form>
-
-      <div modal-footer>
-
-        <div class="flex gap-5">
-
-          <app-button 
-          label="Cancelar" 
-          [isPrimary]="false"
-          (clicked)="handleCloseModal()"
-          ></app-button>
-          <app-button 
-            [label]="isEditMode ? 'Actualizar' : 'Guardar'"
-            [disabled]="productForm.invalid || isSubmitting"
-            [isLoading]="isSubmitting"
-            (clicked)="onSubmit()"
-          ></app-button>
-
-        </div>
+        </form>
 
       </div>
-
-    </app-modal>
+    </div>
 
     <!-- Modal de Detalle -->
-    <app-modal 
-      [isOpen]="isDetailModalOpen" 
-      (onClose)="closeDetailModal()"
-      size="md"
-    >
-      <span modal-title>Detalle del Producto</span>
-      <span modal-description>Información completa del producto</span>
-
-      <div modal-body class="product-detail" *ngIf="selectedProduct">
-        <div class="detail-image" *ngIf="selectedProduct.image">
-          <img [src]="selectedProduct.image" [alt]="selectedProduct.name" />
-        </div>
-
-        <div class="detail-grid">
-          <div class="detail-item">
-            <span class="detail-label">ID:</span>
-            <span class="detail-value">{{ selectedProduct.id }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Nombre:</span>
-            <span class="detail-value">{{ selectedProduct.name }}</span>
-          </div>
-
-          <div class="detail-item full-width">
-            <span class="detail-label">Descripción:</span>
-            <span class="detail-value">{{ selectedProduct.description || 'Sin descripción' }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Precio:</span>
-            <span class="detail-value price">${{ selectedProduct.price.toFixed(2) }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Stock:</span>
-            <span class="detail-value" [class.low-stock]="selectedProduct.stock < 10">
-              {{ selectedProduct.stock }} unidades
-            </span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Estado:</span>
-            <span class="detail-value">
-              <span class="status-badge" [class.active]="selectedProduct.status" [class.inactive]="!selectedProduct.status">
-                {{ selectedProduct.status ? 'Activo' : 'Inactivo' }}
-              </span>
-            </span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-label">Valor Total:</span>
-            <span class="detail-value total">${{ (selectedProduct.price * selectedProduct.stock).toFixed(2) }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div modal-footer>
-
-        <div class="flex gap-5">
-
-          <app-button 
-          label="Cerrar" 
-          [isPrimary]="false"
-          (clicked)="closeDetailModal()"
-          ></app-button>
-          <app-button 
-            label="Editar Producto"
-            (clicked)="editProduct(selectedProduct!.id)"
-          ></app-button>
-
-        </div>
+    <div class="modal-overlay" [class.show]="isDetailModalOpen" (click)="onOverlayClick($event, 'detail')">
+      <div class="modal-container" [class.show]="isDetailModalOpen" (click)="$event.stopPropagation()">
         
-      </div>
+        <div class="modal-wrapper">
+          <!-- Header del Modal -->
+          <div class="modal-header">
+            <div class="modal-header-content">
+              <h2 class="modal-title">Detalle del Producto</h2>
+              <p class="modal-description">Información completa del producto</p>
+            </div>
+            <button type="button" class="modal-close" (click)="closeDetailModal()">
+              <ng-icon name="lucideX" size="24"></ng-icon>
+            </button>
+          </div>
 
-    </app-modal>
+          <!-- Body del Modal -->
+          <div class="modal-body">
+            <div class="product-detail" *ngIf="selectedProduct">
+              <div class="detail-image" *ngIf="selectedProduct.image">
+                <img [src]="selectedProduct.image" [alt]="selectedProduct.name" />
+              </div>
+
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">ID:</span>
+                  <span class="detail-value">{{ selectedProduct.id }}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Nombre:</span>
+                  <span class="detail-value">{{ selectedProduct.name }}</span>
+                </div>
+
+                <div class="detail-item full-width">
+                  <span class="detail-label">Descripción:</span>
+                  <span class="detail-value">{{ selectedProduct.description || 'Sin descripción' }}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Precio:</span>
+                  <span class="detail-value price">${{ selectedProduct.price.toFixed(2) }}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Stock:</span>
+                  <span class="detail-value" [class.low-stock]="selectedProduct.stock < 10">
+                    {{ selectedProduct.stock }} unidades
+                  </span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Estado:</span>
+                  <span class="detail-value">
+                    <span class="status-badge" [class.active]="selectedProduct.status" [class.inactive]="!selectedProduct.status">
+                      {{ selectedProduct.status ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Valor Total:</span>
+                  <span class="detail-value total">${{ (selectedProduct.price * selectedProduct.stock).toFixed(2) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer del Modal -->
+          <div class="modal-footer">
+            <div class="flex gap-5">
+              <app-button 
+                label="Cerrar" 
+                [isPrimary]="false"
+                (clicked)="closeDetailModal()"
+              ></app-button>
+              <app-button 
+                label="Editar Producto"
+                (clicked)="editProduct(selectedProduct!.id)"
+              ></app-button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </div>
+
+<ngx-sonner-toaster position="top-right" [theme]="'dark'" />

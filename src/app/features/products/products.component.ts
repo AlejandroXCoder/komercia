@@ -1,16 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, HostListener, Inject, PLATFORM_ID, ChangeDetectorRef, NgZone } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { TableComponent } from '../../shared/components/table/table.component';
+import { TableComponent, TableCell, StatusCell, ActionCell } from '../../shared/components/table/table.component';
 import { SearchBarComponent } from '../../shared/components/searchBar/searchBar.component';
 import { StatComponent } from '../../shared/components/stat/stat.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { InputComponent } from '../../shared/components/Input/input.component';
-import { ModalDescriptionDirective } from '../../shared/directives/modal-description.directive';
-import { ModalFooterDirective } from '../../shared/directives/modal-footer.directive';
-import { provideIcons } from '@ng-icons/core';
+import { NgIcon, provideIcons } from '@ng-icons/core';
 import { 
   lucidePlus, 
   lucideDollarSign, 
@@ -19,7 +16,8 @@ import {
   lucideImage,
   lucideEye,
   lucideEdit,
-  lucideTrash2
+  lucideTrash2,
+  lucideX
 } from '@ng-icons/lucide';
 import { ProductService } from '../../core/services/product.service';
 import { Product, ProductDTO } from '../../core/models/product.model';
@@ -38,10 +36,8 @@ import { toast, NgxSonnerToaster } from 'ngx-sonner';
     SearchBarComponent, 
     StatComponent, 
     ButtonComponent, 
-    ModalComponent, 
     InputComponent,
-    ModalDescriptionDirective,
-    ModalFooterDirective,
+    NgIcon,
     NgxSonnerToaster
   ],
   providers: [provideIcons({ 
@@ -52,7 +48,8 @@ import { toast, NgxSonnerToaster } from 'ngx-sonner';
     lucideImage,
     lucideEye,
     lucideEdit,
-    lucideTrash2
+    lucideTrash2,
+    lucideX
   })],
   templateUrl: './products.component.html',
   styleUrls: ['./products.component.scss']
@@ -61,7 +58,7 @@ export class ProductsComponent implements OnInit {
   headers = ['ID', 'Nombre', 'Descripción', 'Precio', 'Stock', 'Estado', 'Acciones'];
   
   productsData: Product[] = [];
-  filteredProductsData: any[][] = [];
+  filteredProductsData: TableCell[][] = [];
   allProducts: Product[] = [];
   modalType: 'none' | 'form' | 'detail' = 'none';
   productForm!: FormGroup;
@@ -70,6 +67,7 @@ export class ProductsComponent implements OnInit {
   isLoading = false;
   currentProductId?: number;
   selectedProduct?: Product;
+  private isBrowser: boolean;
 
   get isModalOpen(): boolean {
     return this.modalType === 'form';
@@ -87,8 +85,13 @@ export class ProductsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private productService: ProductService
-  ) {}
+    private productService: ProductService,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
+    @Inject(PLATFORM_ID) platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   ngOnInit() {
     this.initForm();
@@ -107,28 +110,29 @@ export class ProductsComponent implements OnInit {
   }
 
   loadProducts() {
-  this.isLoading = true;
-  this.productService.getAllProducts({ page: this.currentPage, size: this.pageSize })
-    .pipe(finalize(() => {
-      this.isLoading = false;
-    }))
-    .subscribe({
-      next: (response) => {
-        
-        // CAMBIO AQUÍ: Acceder a response.data.data en lugar de response.data.content
-        this.productsData = response.data.data || [];
-        this.allProducts = response.data.data || [];
-        this.totalElements = response.data.totalItems || 0;
-        this.totalPages = response.data.totalPages || 0;
-        this.updateTableData();
-      },
-      error: (error) => {
-        this.productsData = [];
-        this.allProducts = [];
-        this.updateTableData();
-      }
-    });
-}
+    this.isLoading = true;
+    this.productService.getAllProducts({ page: this.currentPage, size: this.pageSize })
+      .pipe(finalize(() => {
+        this.isLoading = false;
+      }))
+      .subscribe({
+        next: (response) => {
+          this.productsData = response.data.data || [];
+          this.allProducts = response.data.data || [];
+          this.totalElements = response.data.totalItems || 0;
+          this.totalPages = response.data.totalPages || 0;
+          this.updateTableData();
+        },
+        error: (error) => {
+          this.productsData = [];
+          this.allProducts = [];
+          this.updateTableData();
+          toast.error('Error al cargar productos', {
+            description: 'No se pudieron cargar los productos. Intente nuevamente.'
+          });
+        }
+      });
+  }
 
   onInputChange(fieldName: string, event: any) {
     const value = event.target?.value || event;
@@ -141,15 +145,14 @@ export class ProductsComponent implements OnInit {
       this.filteredProductsData = [];
       return;
     }
-    
     this.filteredProductsData = this.productsData.map(product => [
       product.id,
       product.name,
       product.description || 'Sin descripción',
       `$${product.price.toFixed(2)}`,
       product.stock,
-      { status: product.status, id: product.id },
-      { product } // Pasamos el producto completo para las acciones
+      { type: 'status', id: product.id, status: product.status } as StatusCell,
+      { type: 'actions', product } as ActionCell
     ]);
   }
 
@@ -199,7 +202,11 @@ export class ProductsComponent implements OnInit {
         status: true
       });
     }
-    this.modalType = 'form'
+    this.modalType = 'form';
+    
+    if (this.isBrowser) {
+      document.body.style.overflow = 'hidden';
+    }
   }
 
   handleCloseModal() {
@@ -211,9 +218,38 @@ export class ProductsComponent implements OnInit {
 
   closeModal() {
     this.modalType = 'none';
-    this.productForm.reset();
-    this.isEditMode = false;
-    this.currentProductId = undefined;
+    
+    if (this.isBrowser) {
+      document.body.style.overflow = '';
+    }
+    
+    // Limpiar el formulario después de la animación
+    setTimeout(() => {
+      this.productForm.reset();
+      this.isEditMode = false;
+      this.currentProductId = undefined;
+    }, 300);
+  }
+
+  onOverlayClick(event: MouseEvent, modalType: 'form' | 'detail') {
+    if (event.target === event.currentTarget) {
+      if (modalType === 'form') {
+        this.handleCloseModal();
+      } else {
+        this.closeDetailModal();
+      }
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleEscape(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      if (this.isModalOpen) {
+        this.handleCloseModal();
+      } else if (this.isDetailModalOpen) {
+        this.closeDetailModal();
+      }
+    }
   }
 
   onSubmit() {
@@ -249,44 +285,66 @@ export class ProductsComponent implements OnInit {
       .pipe(finalize(() => this.isSubmitting = false))
       .subscribe({
         next: (response) => {
-          toast.success(response.message || 'Operación exitosa', {
-            description: 'El producto se guardó correctamente.'
+          // Usar el título y mensaje de la respuesta de la API
+          toast.success(response.title || 'Operación exitosa', {
+            description: response.message || 'El producto se guardó correctamente.'
           });
           this.loadProducts();
           this.closeModal();
         },
         error: (error) => {
           console.error('Error al guardar el producto:', error);
-          toast.error('Error al guardar el producto', {
-            description: error?.error?.message || 'Por favor, intente nuevamente.'
+          // Manejar errores de la API con su estructura
+          const errorTitle = error?.error?.title || 'Error al guardar';
+          const errorMessage = error?.error?.message || 'Por favor, intente nuevamente.';
+          
+          toast.error(errorTitle, {
+            description: errorMessage
           });
         }
       });
   }
 
   viewProductDetail(id: number) {
-    this.productService.getProductById(id).subscribe({
-      next: (response) => {
+  this.productService.getProductById(id).subscribe({
+    next: (response) => {
+      this.ngZone.run(() => {
         this.selectedProduct = response.data;
         this.modalType = 'detail';
-      },
-      error: (error) => {
-        console.error('Error al cargar producto:', error);
-      }
-    });
-  }
+        this.cdr.detectChanges();
+        
+        if (this.isBrowser) {
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    },
+    error: (error) => {
+      console.error('Error al cargar producto:', error);
+      toast.error('Error al cargar', {
+        description: 'No se pudo cargar la información del producto.'
+      });
+    }
+  });
+}
 
   editProduct(id: number) {
     this.productService.getProductById(id).subscribe({
       next: (response) => {
         const product = response.data;
-        this.closeDetailModal(); 
+        // Cerrar el modal de detalle primero
+        this.modalType = 'none';
+        this.selectedProduct = undefined;
+        
+        // Esperar a que se cierre completamente antes de abrir el de edición
         setTimeout(() => {
           this.openModal(product);
-        }, 100); 
+        }, 300); // Tiempo suficiente para la animación de cierre
       },
       error: (error) => {
         console.error('Error al cargar producto:', error);
+        toast.error('Error al cargar', {
+          description: 'No se pudo cargar el producto para editar.'
+        });
       }
     });
   }
@@ -298,15 +356,24 @@ export class ProductsComponent implements OnInit {
 
     this.productService.deleteProduct(id).subscribe({
       next: (response) => {
-        toast.success(response.message || 'Producto eliminado', {
-          description: 'El producto fue eliminado correctamente.'
+        toast.success(response.title || 'Producto eliminado', {
+          description: response.message || 'El producto fue eliminado correctamente.'
         });
+
+        // Si solo queda un elemento en la página y no estamos en la primera, retroceder página
+        if (this.filteredProductsData.length === 1 && this.currentPage > 0) {
+          this.currentPage--;
+        }
+
         this.loadProducts();
       },
       error: (error) => {
         console.error('Error al eliminar producto:', error);
-        toast.error('Error al eliminar el producto', {
-          description: error?.error?.message || 'No se pudo eliminar el producto.'
+        const errorTitle = error?.error?.title || 'Error al eliminar';
+        const errorMessage = error?.error?.message || 'No se pudo eliminar el producto.';
+        
+        toast.error(errorTitle, {
+          description: errorMessage
         });
       }
     });
@@ -316,15 +383,18 @@ export class ProductsComponent implements OnInit {
     const newStatus = !currentStatus;
     this.productService.toggleProductStatus(id, newStatus).subscribe({
       next: (response) => {
-        toast.success(response.message || 'Estado actualizado', {
-          description: 'El estado del producto fue actualizado.'
+        toast.success(response.title || 'Estado actualizado', {
+          description: response.message || 'El estado del producto fue actualizado.'
         });
         this.loadProducts();
       },
       error: (error) => {
         console.error('Error al cambiar estado:', error);
-        toast.error('Error al cambiar el estado', {
-          description: error?.error?.message || 'No se pudo actualizar el estado.'
+        const errorTitle = error?.error?.title || 'Error al actualizar';
+        const errorMessage = error?.error?.message || 'No se pudo actualizar el estado.';
+        
+        toast.error(errorTitle, {
+          description: errorMessage
         });
       }
     });
@@ -332,7 +402,15 @@ export class ProductsComponent implements OnInit {
 
   closeDetailModal() {
     this.modalType = 'none';
-    this.selectedProduct = undefined;
+    
+    if (this.isBrowser) {
+      document.body.style.overflow = '';
+    }
+    
+    // Limpiar el producto seleccionado después de la animación
+    setTimeout(() => {
+      this.selectedProduct = undefined;
+    }, 300);
   }
 
   handleAction(action: TableAction): void {
@@ -391,8 +469,6 @@ export class ProductsComponent implements OnInit {
     });
   }
 
-
-
   get totalProductos(): number {
     return this.totalElements || this.productsData.length;
   }
@@ -404,5 +480,11 @@ export class ProductsComponent implements OnInit {
 
   get productosActivos(): number {
     return this.allProducts.filter(p => p.status).length;
+  }
+
+  ngOnDestroy() {
+    if (this.isBrowser) {
+      document.body.style.overflow = '';
+    }
   }
 }

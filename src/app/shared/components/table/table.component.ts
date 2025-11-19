@@ -1,8 +1,21 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideEye, lucideEdit, lucideTrash2 } from '@ng-icons/lucide';
+import { NgIcon,  provideIcons} from '@ng-icons/core';
+import { lucideEye, lucideEdit, lucideTrash2} from '@ng-icons/lucide';
+
+export type TableCell = string | number | StatusCell | ActionCell;
+
+export interface StatusCell {
+  type: 'status';
+  id: number;
+  status: boolean;
+}
+
+export interface ActionCell {
+  type: 'actions';
+  product: any;
+}
 
 export interface TableAction {
   type: 'view' | 'edit' | 'delete';
@@ -15,67 +28,46 @@ export interface TableAction {
   imports: [CommonModule, FormsModule, NgIcon],
   providers: [provideIcons({ lucideEye, lucideEdit, lucideTrash2 })],
   templateUrl: './table.component.html',
-  styleUrls: ['./table.component.scss']
+  styleUrls: ['./table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableComponent {
   @Input() headers: string[] = [];
-  @Input() data: any[][] = [];
+  @Input() data: TableCell[][] = [];
   @Input() isLoading: boolean = false;
-  
+
   @Output() actionTriggered = new EventEmitter<TableAction>();
   @Output() statusToggled = new EventEmitter<{ id: number; currentStatus: boolean }>();
 
   rowsPerPageOptions = [5, 10, 20, 50];
   rowsPerPage = 5;
   currentPage = 1;
-  totalPages = 1;
-  paginatedData: any[][] = [];
 
-  ngOnInit() {
-    this.updatePagination();
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.data.length / this.rowsPerPage));
   }
 
-  ngOnChanges() {
-    this.updatePagination();
-  }
-
-  updatePagination() {
-    this.totalPages = Math.ceil(this.data.length / this.rowsPerPage) || 1;
-    
-    // Ajustar currentPage si es mayor que totalPages
-    if (this.currentPage > this.totalPages) {
-      this.currentPage = this.totalPages;
-    }
-    
+  get paginatedData(): TableCell[][] {
     const startIndex = (this.currentPage - 1) * this.rowsPerPage;
-    const endIndex = startIndex + this.rowsPerPage;
-    this.paginatedData = this.data.slice(startIndex, endIndex);
+    return this.data.slice(startIndex, startIndex + this.rowsPerPage);
   }
 
   goToPreviousPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePagination();
-    }
+    if (this.currentPage > 1) this.currentPage--;
   }
 
   goToNextPage() {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updatePagination();
-    }
+    if (this.currentPage < this.totalPages) this.currentPage++;
   }
 
-  isObject(value: any): boolean {
-    return value !== null && typeof value === 'object' && !Array.isArray(value);
+  trackByRow = (index: number, row: TableCell[]) => row[0];
+
+  isStatusCell(cell: TableCell): cell is StatusCell {
+    return typeof cell === 'object' && cell !== null && (cell as StatusCell).type === 'status';
   }
 
-  isStatusColumn(value: any): boolean {
-    return this.isObject(value) && 'status' in value && 'id' in value;
-  }
-
-  isActionsColumn(value: any): boolean {
-    return this.isObject(value) && 'product' in value;
+  isActionCell(cell: TableCell): cell is ActionCell {
+    return typeof cell === 'object' && cell !== null && (cell as ActionCell).type === 'actions';
   }
 
   onAction(type: 'view' | 'edit' | 'delete', product: any): void {

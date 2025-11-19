@@ -7,47 +7,35 @@
     </thead>
     <tbody>
       <!-- Filas de datos -->
-      <tr *ngFor="let row of paginatedData; let i = index">
-        <td *ngFor="let column of row; let colIndex = index">
-          <!-- Columna normal -->
-          <ng-container *ngIf="!isObject(column)">
-            {{ column }}
+      <tr *ngFor="let row of paginatedData; trackBy: trackByRow">
+        <td *ngFor="let cell of row">
+          <!-- Celda normal -->
+          <ng-container *ngIf="!(isStatusCell(cell) || isActionCell(cell))">
+            {{ cell }}
           </ng-container>
 
-          <!-- Columna de estado con switch -->
-          <ng-container *ngIf="isStatusColumn(column)">
+          <!-- Celda de estado -->
+          <ng-container *ngIf="isStatusCell(cell)">
             <label class="switch">
               <input 
                 type="checkbox" 
-                [checked]="column.status"
-                (change)="onStatusToggle(column.id, column.status)"
+                [checked]="cell.status"
+                (change)="onStatusToggle(cell.id, cell.status)"
               >
               <span class="slider"></span>
             </label>
           </ng-container>
 
-          <!-- Columna de acciones -->
-          <ng-container *ngIf="isActionsColumn(column)">
+          <!-- Celda de acciones -->
+          <ng-container *ngIf="isActionCell(cell)">
             <div class="action-buttons">
-              <button 
-                class="action-btn view-btn" 
-                (click)="onAction('view', column.product)"
-                title="Ver detalles"
-              >
+              <button class="action-btn view-btn" (click)="onAction('view', cell.product)" title="Ver detalles">
                 <ng-icon name="lucideEye" size="18"></ng-icon>
               </button>
-              <button 
-                class="action-btn edit-btn" 
-                (click)="onAction('edit', column.product)"
-                title="Editar"
-              >
+              <button class="action-btn edit-btn" (click)="onAction('edit', cell.product)" title="Editar">
                 <ng-icon name="lucideEdit" size="18"></ng-icon>
               </button>
-              <button 
-                class="action-btn delete-btn" 
-                (click)="onAction('delete', column.product)"
-                title="Eliminar"
-              >
+              <button class="action-btn delete-btn" (click)="onAction('delete', cell.product)" title="Eliminar">
                 <ng-icon name="lucideTrash2" size="18"></ng-icon>
               </button>
             </div>
@@ -83,7 +71,7 @@
     </div>
     <div class="pagination-right">
       <span>Página {{ currentPage }} de {{ totalPages }}</span>
-      <select [(ngModel)]="rowsPerPage" (change)="updatePagination()">
+      <select [(ngModel)]="rowsPerPage">
         <option *ngFor="let option of rowsPerPageOptions" [value]="option">
           {{ option }}
         </option>
