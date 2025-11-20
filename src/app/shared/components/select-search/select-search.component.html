@@ -1,0 +1,50 @@
+<div class="select-search-container" [class.disabled]="disabled" [class.error]="error">
+  <div class="select-trigger" (click)="toggleDropdown()">
+    <span class="select-value" *ngIf="selectedOption; else placeholderTemplate">
+      <img *ngIf="selectedOption.image" [src]="selectedOption.image" [alt]="selectedOption.label" class="option-image">
+      <span class="option-text">
+        <span class="option-label">{{ selectedOption.label }}</span>
+        <span *ngIf="selectedOption.subtitle" class="option-subtitle">{{ selectedOption.subtitle }}</span>
+      </span>
+    </span>
+    <ng-template #placeholderTemplate>
+      <span class="select-placeholder">{{ placeholder }}</span>
+    </ng-template>
+    <ng-icon name="lucideChevronDown" size="20" class="chevron-icon" [class.rotated]="isOpen"></ng-icon>
+  </div>
+
+  <div class="select-dropdown" *ngIf="isOpen" (click)="$event.stopPropagation()">
+    <div class="search-box">
+      <ng-icon name="lucideSearch" size="18" class="search-icon"></ng-icon>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchChange()"
+        [placeholder]="searchPlaceholder"
+        class="search-input"
+        (click)="$event.stopPropagation()"
+      >
+    </div>
+
+    <div class="options-list">
+      <div 
+        *ngFor="let option of filteredOptions" 
+        class="option-item"
+        (click)="selectOption(option)"
+        [class.selected]="selectedOption?.value === option.value"
+      >
+        <img *ngIf="option.image" [src]="option.image" [alt]="option.label" class="option-image">
+        <span class="option-text">
+          <span class="option-label">{{ option.label }}</span>
+          <span *ngIf="option.subtitle" class="option-subtitle">{{ option.subtitle }}</span>
+        </span>
+      </div>
+
+      <div *ngIf="filteredOptions.length === 0" class="no-results">
+        No se encontraron resultados
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="select-backdrop" *ngIf="isOpen" (click)="closeDropdown()"></div>

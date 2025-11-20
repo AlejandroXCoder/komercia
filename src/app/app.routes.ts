@@ -4,6 +4,7 @@ import { MainLayoutComponent } from './core/layout/main-layout/main-layout.compo
 import { HomeComponent } from './features/home/home.component';
 import { SalesComponent } from './features/sales/sales.component';
 import { ProductsComponent } from './features/products/products.component';
+import { SellersComponent } from './features/sellers/sellers.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -27,6 +28,13 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       { path: '', component: ProductsComponent },
+    ],
+  },
+  {
+    path: 'sellers',
+    component: MainLayoutComponent,
+    children: [
+      { path: '', component: SellersComponent },
     ],
   }
 ];

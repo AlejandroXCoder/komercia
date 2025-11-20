@@ -10,8 +10,20 @@
       <tr *ngFor="let row of paginatedData; trackBy: trackByRow">
         <td *ngFor="let cell of row">
           <!-- Celda normal -->
-          <ng-container *ngIf="!(isStatusCell(cell) || isActionCell(cell))">
+          <ng-container *ngIf="!(isStatusCell(cell) || isActionCell(cell) || isImageCell(cell))">
             {{ cell }}
+          </ng-container>
+
+          <!-- Celda de imagen -->
+          <ng-container *ngIf="isImageCell(cell)">
+            <div class="table-image-container">
+              <img 
+                [src]="cell.src" 
+                [alt]="cell.alt || 'Imagen'"
+                class="table-image"
+                (error)="$event.target.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%232A2A2A%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22%239CA3AF%22 font-family=%22Arial%22 font-size=%2214%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ESin foto%3C/text%3E%3C/svg%3E'"
+              />
+            </div>
           </ng-container>
 
           <!-- Celda de estado -->

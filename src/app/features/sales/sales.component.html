@@ -1,3 +1,5 @@
+<ngx-sonner-toaster position="top-right" [duration]="4000" [richColors]="true"></ngx-sonner-toaster>
+
 <div class="flex items-center justify-center bg-[url('/BgMain.svg')] bg-cover bg-center h-full text-white px-4 sm:px-10 lg:px-[100px] py-10 lg:py-[70px]">
   <div class="w-full max-w-[1600px] h-full gap-8 flex flex-col">
 
@@ -10,7 +12,7 @@
       ></app-stat>
 
       <app-stat
-        [value]="valorTotalVentas.toString()"
+        [value]="valorTotalVentas"
         title="Ingresos Totales"
         icon="lucideDollarSign"
         colorClass="success"
@@ -42,34 +44,41 @@
       [headers]="headers" 
       [data]="filteredSalesData"
       [isLoading]="isLoading"
+      (actionTriggered)="handleAction($event)"
+      (statusToggled)="handleStatusToggle($event)"
     ></app-table>
+  </div>
+</div>
 
-    <app-modal 
-      [isOpen]="isModalOpen" 
-      (onClose)="handleCloseModal()"
-      size="md"
-    >
-      <span modal-title>{{ isEditMode ? 'Editar venta' : 'Registrar nueva venta' }}</span>
-      <span modal-description>Complete los datos de la venta</span>
+<!-- Modal de Formulario -->
+<div class="modal-overlay" [class.show]="isModalOpen" (click)="onOverlayClick($event, 'form')">
+  <div class="modal-container modal-lg" [class.show]="isModalOpen" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title">{{ isEditMode ? 'Editar venta' : 'Registrar nueva venta' }}</h2>
+        <p class="modal-description">Asocie productos y vendedor</p>
+      </div>
+      <button (click)="handleCloseModal()" class="modal-close-btn">
+        <ng-icon name="lucideX" size="24"></ng-icon>
+      </button>
+    </div>
 
-      <form [formGroup]="saleForm" (ngSubmit)="saveSale()" modal-body class="space-y-5">
-        
+    <form [formGroup]="saleForm" (ngSubmit)="onSubmit()" class="modal-body">
+      
+      <div class="form-row">
         <div class="form-group">
           <label class="form-label">
             Vendedor <span class="text-red-400">*</span>
           </label>
-          <select 
-            formControlName="vendedor" 
-            class="form-select"
-            [class.error]="isFieldInvalid('vendedor')"
-          >
-            <option value="">Seleccione un vendedor</option>
-            <option *ngFor="let seller of sellers" [value]="seller.id">
-              {{ seller.nombre }}
-            </option>
-          </select>
-          <span class="form-error" *ngIf="isFieldInvalid('vendedor')">
-            {{ getErrorMessage('vendedor') }}
+          <app-select-search
+            [options]="sellerOptions"
+            placeholder="Seleccione un vendedor"
+            searchPlaceholder="Busque el vendedor"
+            formControlName="seller"
+            [error]="isFieldInvalid('seller')"
+          ></app-select-search>
+          <span class="form-error" *ngIf="isFieldInvalid('seller')">
+            {{ getErrorMessage('seller') }}
           </span>
         </div>
 
@@ -77,116 +86,216 @@
           <label class="form-label">
             Fecha <span class="text-red-400">*</span>
           </label>
-          <app-input 
+          <input 
             type="date" 
-            [value]="saleForm.get('fecha')?.value"
-            (input)="onDateChange($event)"
-            [ngClass]="{'error': isFieldInvalid('fecha')}"
-          ></app-input>
-          <span class="form-error" *ngIf="isFieldInvalid('fecha')">
-            {{ getErrorMessage('fecha') }}
+            formControlName="date"
+            class="form-input"
+            [class.error]="isFieldInvalid('date')"
+          >
+          <span class="form-error" *ngIf="isFieldInvalid('date')">
+            {{ getErrorMessage('date') }}
           </span>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          
-          <div class="form-group">
-            <label class="form-label">
-              Total <span class="text-red-400">*</span>
-            </label>
-            <app-input 
-              type="number" 
-              placeholder="0.00"
-              iconName="lucideDollarSign"
-              [value]="saleForm.get('total')?.value"
-              (input)="onInputChange('total', $event)"
-              [ngClass]="{'error': isFieldInvalid('total')}"
-            ></app-input>
-            <span class="form-error" *ngIf="isFieldInvalid('total')">
-              {{ getErrorMessage('total') }}
-            </span>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">
-              Cantidad de productos <span class="text-red-400">*</span>
-            </label>
-            <app-input 
-              type="number" 
-              placeholder="0"
-              iconName="lucideBox"
-              [value]="saleForm.get('cantidadProductos')?.value"
-              (input)="onInputChange('cantidadProductos', $event)"
-              [ngClass]="{'error': isFieldInvalid('cantidadProductos')}"
-            ></app-input>
-            <span class="form-error" *ngIf="isFieldInvalid('cantidadProductos')">
-              {{ getErrorMessage('cantidadProductos') }}
-            </span>
-          </div>
-
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">
-            Estado <span class="text-red-400">*</span>
-          </label>
-          <div class="flex gap-4">
-            <label class="radio-label">
-              <input 
-                type="radio" 
-                formControlName="estado" 
-                value="Activo"
-                class="radio-input"
-              >
-              <span class="radio-text">Activo</span>
-            </label>
-            <label class="radio-label">
-              <input 
-                type="radio" 
-                formControlName="estado" 
-                value="Inactivo"
-                class="radio-input"
-              >
-              <span class="radio-text">Inactivo</span>
-            </label>
-          </div>
-          <span class="form-error" *ngIf="isFieldInvalid('estado')">
-            {{ getErrorMessage('estado') }}
-          </span>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Notas (opcional)</label>
-          <textarea 
-            formControlName="notas" 
-            class="form-textarea"
-            placeholder="Agregue notas adicionales sobre la venta..."
-            rows="3"
-          ></textarea>
-        </div>
-
-      </form>
-
-      <div modal-footer>
-        
-        <div class="flex w-auto justify-center gap-5 align-middle">
-
-          <app-button 
-          label="Cancelar" 
-          [isPrimary]="false"
-          (clicked)="handleCloseModal()"
-          ></app-button>
-          <app-button 
-            [label]="isEditMode ? 'Actualizar' : 'Guardar'"
-            [disabled]="saleForm.invalid || isSubmitting"
-            [isLoading]="isSubmitting"
-            (clicked)="onSubmit()"
-          ></app-button>
-
-        </div>
-        
       </div>
 
-    </app-modal>
+      <div class="form-group">
+        <label class="form-label mb-2">
+          Busque el producto <span class="text-red-400">*</span>
+        </label>
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <app-select-search
+              [options]="productOptions"
+              placeholder="Seleccione un producto"
+              searchPlaceholder="Busque el producto"
+              (optionSelected)="selectedProductId = $event"
+            ></app-select-search>
+          </div>
+          <button 
+            type="button"
+            (click)="addProductToSale()"
+            class="btn-add-product"
+            [disabled]="!selectedProductId"
+          >
+            <ng-icon name="lucidePlus" size="20"></ng-icon>
+            Agregar
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Cards -->
+      <div class="products-section" *ngIf="productCards.length > 0">
+        <div class="products-grid">
+          <div *ngFor="let card of productCards" class="product-card">
+            <img 
+              *ngIf="card.product.image" 
+              [src]="'data:image/jpeg;base64,' + card.product.image" 
+              [alt]="card.product.name"
+              class="product-image"
+            >
+            <div *ngIf="!card.product.image" class="product-image-placeholder">
+              <ng-icon name="lucideBox" size="32"></ng-icon>
+            </div>
+            
+            <div class="product-info">
+              <h4 class="product-name">{{ card.product.name }}</h4>
+              <p class="product-description" *ngIf="card.product.description">
+                {{ card.product.description }}
+              </p>
+              <p class="product-price">${{ card.product.price | number:'1.0-0' }}</p>
+            </div>
+
+            <div class="product-actions">
+              <div class="quantity-controls">
+                <button 
+                  type="button"
+                  (click)="updateQuantity(card.product.id, -1)"
+                  class="quantity-btn"
+                >
+                  <ng-icon name="lucideMinus" size="16"></ng-icon>
+                </button>
+                <span class="quantity-value">{{ card.quantity }}</span>
+                <button 
+                  type="button"
+                  (click)="updateQuantity(card.product.id, 1)"
+                  class="quantity-btn"
+                  [disabled]="card.quantity >= card.product.stock"
+                >
+                  <ng-icon name="lucidePlus" size="16"></ng-icon>
+                </button>
+              </div>
+
+              <button 
+                type="button"
+                (click)="removeProductCard(card.product.id)"
+                class="remove-btn"
+              >
+                <ng-icon name="lucideX" size="20"></ng-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-products" *ngIf="productCards.length === 0">
+        <ng-icon name="lucideBox" size="48"></ng-icon>
+        <p>No hay productos agregados</p>
+        <p class="text-sm">Busque y agregue productos a la venta</p>
+      </div>
+
+      <!-- Summary -->
+      <div class="sale-summary" *ngIf="productCards.length > 0">
+        <div class="summary-row">
+          <span class="summary-label">Total de artículos</span>
+          <span class="summary-value">{{ totalProductsInSale }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Subtotal</span>
+          <span class="summary-value">${{ subtotalSale | number:'1.0-0' }}</span>
+        </div>
+        <div class="summary-row total">
+          <span class="summary-label">Total</span>
+          <span class="summary-value">${{ subtotalSale | number:'1.0-0' }}</span>
+        </div>
+      </div>
+
+    </form>
+
+    <div class="modal-footer">
+      <app-button 
+        label="Cancelar" 
+        [isPrimary]="false"
+        (clicked)="handleCloseModal()"
+      ></app-button>
+      <app-button 
+        [label]="isEditMode ? 'Actualizar' : 'Guardar'"
+        [disabled]="saleForm.invalid || isSubmitting || productCards.length === 0"
+        [isLoading]="isSubmitting"
+        (clicked)="onSubmit()"
+      ></app-button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalle -->
+<div class="modal-overlay" [class.show]="isDetailModalOpen" (click)="onOverlayClick($event, 'detail')">
+  <div class="modal-container modal-lg" [class.show]="isDetailModalOpen" (click)="$event.stopPropagation()" *ngIf="selectedSale">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title">Detalle de Venta #{{ selectedSale.id }}</h2>
+        <p class="modal-description">Información completa de la venta</p>
+      </div>
+      <button (click)="closeDetailModal()" class="modal-close-btn">
+        <ng-icon name="lucideX" size="24"></ng-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">Vendedor</span>
+          <span class="detail-value">{{ selectedSale.seller.name }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Email Vendedor</span>
+          <span class="detail-value">{{ selectedSale.seller.email }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Fecha</span>
+          <span class="detail-value">{{ selectedSale.date | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Estado</span>
+          <span class="status-badge" [class.active]="selectedSale.status" [class.inactive]="!selectedSale.status">
+            {{ selectedSale.status ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Total de Productos</span>
+          <span class="detail-value">{{ selectedSale.quantityProducts }}</span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Total</span>
+          <span class="detail-value-highlight">${{ selectedSale.total.toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <h3 class="detail-section-title">Productos</h3>
+        <div class="products-table">
+          <table class="w-full">
+            <thead>
+              <tr class="products-table-header">
+                <th class="text-left">Producto</th>
+                <th class="text-center">Cantidad</th>
+                <th class="text-right">Precio Unit.</th>
+                <th class="text-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let detail of selectedSale.details" class="products-table-row">
+                <td class="text-left">{{ detail.product.name }}</td>
+                <td class="text-center">{{ detail.quantity }}</td>
+                <td class="text-right">${{ detail.unitPrice.toFixed(2) }}</td>
+                <td class="text-right font-semibold">${{ detail.subtotal.toFixed(2) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <app-button 
+        label="Cerrar" 
+        [isPrimary]="false"
+        (clicked)="closeDetailModal()"
+      ></app-button>
+    </div>
   </div>
 </div>

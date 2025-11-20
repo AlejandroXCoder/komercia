@@ -140,16 +140,36 @@
 
             </div>
 
-            <!-- Imagen URL -->
+            <!-- Imagen -->
             <div class="form-group">
-              <label class="form-label">URL de Imagen</label>
-              <app-input 
-                type="text" 
-                placeholder="https://ejemplo.com/imagen.jpg"
-                icon="lucideImage"
-                [value]="productForm.get('image')?.value"
-                (input)="onInputChange('image', $event)"
-              ></app-input>
+              <label class="form-label">Imagen del Producto</label>
+              <div class="image-upload-container">
+                <input 
+                  type="file" 
+                  id="imageUpload"
+                  class="file-input"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  (change)="onFileSelected($event)"
+                >
+                <label for="imageUpload" class="file-label">
+                  <ng-icon name="lucideImage" size="20"></ng-icon>
+                  <span>{{ selectedFileName || 'Seleccionar imagen...' }}</span>
+                </label>
+                <button 
+                  type="button" 
+                  class="clear-image-btn" 
+                  *ngIf="selectedFileName"
+                  (click)="clearImage()"
+                >
+                  <ng-icon name="lucideX" size="20"></ng-icon>
+                </button>
+              </div>
+              <span class="form-hint">Formatos: JPG, PNG, GIF, WEBP (máx. 5MB)</span>
+              
+              <!-- Vista previa de la imagen -->
+              <div class="image-preview" *ngIf="imageBase64">
+                <img [src]="imageBase64" alt="Vista previa">
+              </div>
             </div>
 
             <!-- Estado -->
@@ -184,12 +204,13 @@
           <!-- Footer del Modal -->
           <div class="modal-footer">
             <div class="flex gap-5">
-              <app-button 
-                label="Cancelar" 
-                [isPrimary]="false"
+              <button
                 type="button"
-                (clicked)="handleCloseModal()"
-              ></app-button>
+                class="cancel-button"
+                (click)="handleCloseModal()"
+              >
+                Cancelar
+              </button>
               <app-button 
                 [label]="isEditMode ? 'Actualizar' : 'Guardar'"
                 [disabled]="productForm.invalid || isSubmitting"
@@ -224,7 +245,10 @@
           <div class="modal-body">
             <div class="product-detail" *ngIf="selectedProduct">
               <div class="detail-image" *ngIf="selectedProduct.image">
-                <img [src]="selectedProduct.image" [alt]="selectedProduct.name" />
+                <img 
+                  [src]="selectedProduct.image.startsWith('data:') ? selectedProduct.image : 'data:image/png;base64,' + selectedProduct.image" 
+                  [alt]="selectedProduct.name" 
+                />
               </div>
 
               <div class="detail-grid">

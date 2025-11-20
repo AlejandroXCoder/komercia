@@ -68,6 +68,8 @@ export class ProductsComponent implements OnInit {
   currentProductId?: number;
   selectedProduct?: Product;
   private isBrowser: boolean;
+  selectedFileName: string = '';
+  imageBase64: string = '';
 
   get isModalOpen(): boolean {
     return this.modalType === 'form';
@@ -140,6 +142,68 @@ export class ProductsComponent implements OnInit {
     this.productForm.get(fieldName)?.markAsTouched();
   }
 
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Validar tipo de archivo
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Formato no válido', {
+          description: 'Por favor seleccione una imagen válida (JPG, PNG, GIF, WEBP)'
+        });
+        return;
+      }
+
+      // Validar tamaño (máximo 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        toast.error('Archivo muy grande', {
+          description: 'La imagen no debe superar los 5MB'
+        });
+        return;
+      }
+
+      this.selectedFileName = file.name;
+      
+      // Convertir a base64
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Full = reader.result as string;
+        // Remover el prefijo data:image/...;base64, y obtener solo el base64 puro
+        const base64Pure = base64Full.split(',')[1];
+        
+        // Guardar la versión completa para la vista previa
+        this.imageBase64 = base64Full;
+        
+        // Guardar solo el base64 puro en el formulario para enviar a la API
+        this.productForm.get('image')?.setValue(base64Pure);
+        this.productForm.get('image')?.markAsTouched();
+      };
+      reader.onerror = () => {
+        toast.error('Error al leer archivo', {
+          description: 'No se pudo procesar la imagen seleccionada'
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  clearImage(): void {
+    this.selectedFileName = '';
+    this.imageBase64 = '';
+    this.productForm.get('image')?.setValue('');
+    
+    // Limpiar el input file
+    if (this.isBrowser) {
+      const fileInput = document.getElementById('imageUpload') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    }
+  }
+
   updateTableData() {
     if (!this.productsData || this.productsData.length === 0) {
       this.filteredProductsData = [];
@@ -182,6 +246,19 @@ export class ProductsComponent implements OnInit {
     if (product) {
       this.isEditMode = true;
       this.currentProductId = product.id;
+      
+      // Si hay imagen, agregar el prefijo para la vista previa si no lo tiene
+      if (product.image) {
+        this.selectedFileName = 'Imagen actual';
+        // Si la imagen no comienza con 'data:', asumimos que es base64 puro y agregamos el prefijo
+        this.imageBase64 = product.image.startsWith('data:') 
+          ? product.image 
+          : `data:image/png;base64,${product.image}`;
+      } else {
+        this.selectedFileName = '';
+        this.imageBase64 = '';
+      }
+      
       this.productForm.patchValue({
         name: product.name,
         description: product.description,
@@ -193,6 +270,8 @@ export class ProductsComponent implements OnInit {
     } else {
       this.isEditMode = false;
       this.currentProductId = undefined;
+      this.selectedFileName = '';
+      this.imageBase64 = '';
       this.productForm.reset({
         name: '',
         description: '',
@@ -228,6 +307,8 @@ export class ProductsComponent implements OnInit {
       this.productForm.reset();
       this.isEditMode = false;
       this.currentProductId = undefined;
+      this.selectedFileName = '';
+      this.imageBase64 = '';
     }, 300);
   }
 

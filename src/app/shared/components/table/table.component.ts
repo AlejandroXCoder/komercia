@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgIcon,  provideIcons} from '@ng-icons/core';
 import { lucideEye, lucideEdit, lucideTrash2} from '@ng-icons/lucide';
 
-export type TableCell = string | number | StatusCell | ActionCell;
+export type TableCell = string | number | StatusCell | ActionCell | ImageCell;
 
 export interface StatusCell {
   type: 'status';
@@ -15,6 +15,12 @@ export interface StatusCell {
 export interface ActionCell {
   type: 'actions';
   product: any;
+}
+
+export interface ImageCell {
+  type: 'image';
+  src: string;
+  alt?: string;
 }
 
 export interface TableAction {
@@ -68,6 +74,10 @@ export class TableComponent {
 
   isActionCell(cell: TableCell): cell is ActionCell {
     return typeof cell === 'object' && cell !== null && (cell as ActionCell).type === 'actions';
+  }
+
+  isImageCell(cell: TableCell): cell is ImageCell {
+    return typeof cell === 'object' && cell !== null && (cell as ImageCell).type === 'image';
   }
 
   onAction(type: 'view' | 'edit' | 'delete', product: any): void {

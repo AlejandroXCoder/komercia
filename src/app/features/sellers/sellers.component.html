@@ -1,0 +1,267 @@
+<div class="flex items-center justify-center bg-[url('/BgMain.svg')] bg-cover bg-center h-full text-white px-4 sm:px-10 lg:px-[100px] py-10 lg:py-[70px]">
+  <div class="w-full max-w-[1600px] h-full gap-8 flex flex-col">
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <app-stat
+        [value]="totalVendedores.toString()"
+        title="Total de Vendedores"
+        icon="lucideUsers"
+        colorClass="primary"
+      ></app-stat>
+
+      <app-stat
+        [value]="vendedoresActivos.toString()"
+        title="Vendedores Activos"
+        icon="lucideCheckCircle"
+        colorClass="success"
+      ></app-stat>
+
+      <app-stat
+        [value]="vendedoresInactivos.toString()"
+        title="Vendedores Inactivos"
+        icon="lucideUserX"
+        colorClass="purple"
+      ></app-stat>
+    </div>
+
+    <!-- Search and Button -->
+    <div class="flex flex-col sm:flex-row gap-6 items-stretch sm:items-center justify-between">
+      <app-search-bar
+        placeholder="Buscar vendedores por nombre, email o ID..."
+        class="flex-1"
+        (inputChange)="handleSearch($event)"
+      ></app-search-bar>
+
+      <app-button
+        icon="lucidePlus"
+        label="Registrar vendedor"
+        (clicked)="openModal()"
+      ></app-button>
+    </div>
+
+    <!-- Table -->
+    <app-table 
+      [headers]="headers" 
+      [data]="filteredSellersData"
+      [isLoading]="isLoading"
+      (actionTriggered)="handleAction($event)"
+      (statusToggled)="handleStatusToggle($event)"
+    ></app-table>
+
+    <!-- Modal de Formulario -->
+    <div class="modal-overlay" [class.show]="isModalOpen" (click)="onOverlayClick($event, 'form')">
+      <div class="modal-container" [class.show]="isModalOpen" (click)="$event.stopPropagation()">
+        
+        <form [formGroup]="sellerForm" (ngSubmit)="saveSeller()">
+          <!-- Header del Modal -->
+          <div class="modal-header">
+            <div class="modal-header-content">
+              <h2 class="modal-title">{{ isEditMode ? 'Editar vendedor' : 'Registrar nuevo vendedor' }}</h2>
+              <p class="modal-description">Complete los datos del vendedor</p>
+            </div>
+            <button type="button" class="modal-close" (click)="handleCloseModal()">
+              <ng-icon name="lucideX" size="24"></ng-icon>
+            </button>
+          </div>
+
+          <!-- Body del Modal -->
+          <div class="modal-body">
+            
+            <!-- Nombre -->
+            <div class="form-group">
+              <label class="form-label">
+                Nombre <span class="text-red-400">*</span>
+              </label>
+              <app-input 
+                type="text" 
+                placeholder="Ingrese el nombre del vendedor"
+                [value]="sellerForm.get('name')?.value"
+                (input)="onInputChange('name', $event)"
+                [ngClass]="{'error': isFieldInvalid('name')}"
+              ></app-input>
+              <span class="form-error" *ngIf="isFieldInvalid('name')">
+                {{ getErrorMessage('name') }}
+              </span>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label class="form-label">
+                Email <span class="text-red-400">*</span>
+              </label>
+              <app-input 
+                type="email" 
+                placeholder="vendedor@ejemplo.com"
+                icon="lucideMail"
+                [value]="sellerForm.get('email')?.value"
+                (input)="onInputChange('email', $event)"
+                [ngClass]="{'error': isFieldInvalid('email')}"
+              ></app-input>
+              <span class="form-error" *ngIf="isFieldInvalid('email')">
+                {{ getErrorMessage('email') }}
+              </span>
+            </div>
+
+            <!-- Foto -->
+            <div class="form-group">
+              <label class="form-label">Foto del Vendedor</label>
+              <div class="image-upload-container">
+                <input 
+                  type="file" 
+                  id="photoUpload"
+                  class="file-input"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  (change)="onFileSelected($event)"
+                >
+                <label for="photoUpload" class="file-label">
+                  <ng-icon name="lucideImage" size="20"></ng-icon>
+                  <span>{{ selectedFileName || 'Seleccionar foto...' }}</span>
+                </label>
+                <button 
+                  type="button" 
+                  class="clear-image-btn" 
+                  *ngIf="selectedFileName"
+                  (click)="clearPhoto()"
+                >
+                  <ng-icon name="lucideX" size="20"></ng-icon>
+                </button>
+              </div>
+              <span class="form-hint">Formatos: JPG, PNG, GIF, WEBP (máx. 5MB)</span>
+              
+              <!-- Vista previa de la foto -->
+              <div class="image-preview" *ngIf="photoBase64">
+                <img [src]="photoBase64" alt="Vista previa">
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="form-group">
+              <label class="form-label">
+                Estado <span class="text-red-400">*</span>
+              </label>
+              <div class="flex gap-4">
+                <label class="radio-label">
+                  <input 
+                    type="radio" 
+                    formControlName="status" 
+                    [value]="true"
+                    class="radio-input"
+                  >
+                  <span class="radio-text">Activo</span>
+                </label>
+                <label class="radio-label">
+                  <input 
+                    type="radio" 
+                    formControlName="status" 
+                    [value]="false"
+                    class="radio-input"
+                  >
+                  <span class="radio-text">Inactivo</span>
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Footer del Modal -->
+          <div class="modal-footer">
+            <div class="flex gap-5">
+              <button
+                type="button"
+                class="cancel-button"
+                (click)="handleCloseModal()"
+              >
+                Cancelar
+              </button>
+              <app-button 
+                [label]="isEditMode ? 'Actualizar' : 'Guardar'"
+                [disabled]="sellerForm.invalid || isSubmitting"
+                [isLoading]="isSubmitting"
+                type="submit"
+              ></app-button>
+            </div>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Modal de Detalle -->
+    <div class="modal-overlay" [class.show]="isDetailModalOpen" (click)="onOverlayClick($event, 'detail')">
+      <div class="modal-container" [class.show]="isDetailModalOpen" (click)="$event.stopPropagation()">
+        
+        <div class="modal-wrapper">
+          <!-- Header del Modal -->
+          <div class="modal-header">
+            <div class="modal-header-content">
+              <h2 class="modal-title">Detalle del Vendedor</h2>
+              <p class="modal-description">Información completa del vendedor</p>
+            </div>
+            <button type="button" class="modal-close" (click)="closeDetailModal()">
+              <ng-icon name="lucideX" size="24"></ng-icon>
+            </button>
+          </div>
+
+          <!-- Body del Modal -->
+          <div class="modal-body">
+            <div class="product-detail" *ngIf="selectedSeller">
+              <div class="detail-image" *ngIf="selectedSeller.photo">
+                <img 
+                  [src]="selectedSeller.photo.startsWith('data:') ? selectedSeller.photo : 'data:image/png;base64,' + selectedSeller.photo" 
+                  [alt]="selectedSeller.name" 
+                />
+              </div>
+
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">ID:</span>
+                  <span class="detail-value">{{ selectedSeller.id }}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Nombre:</span>
+                  <span class="detail-value">{{ selectedSeller.name }}</span>
+                </div>
+
+                <div class="detail-item full-width">
+                  <span class="detail-label">Email:</span>
+                  <span class="detail-value">{{ selectedSeller.email }}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Estado:</span>
+                  <span class="detail-value">
+                    <span class="status-badge" [class.active]="selectedSeller.status" [class.inactive]="!selectedSeller.status">
+                      {{ selectedSeller.status ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer del Modal -->
+          <div class="modal-footer">
+            <div class="flex gap-5">
+              <app-button 
+                label="Cerrar" 
+                [isPrimary]="false"
+                (clicked)="closeDetailModal()"
+              ></app-button>
+              <app-button 
+                label="Editar Vendedor"
+                (clicked)="editSeller(selectedSeller!.id)"
+              ></app-button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<ngx-sonner-toaster position="top-right" [theme]="'dark'" />
